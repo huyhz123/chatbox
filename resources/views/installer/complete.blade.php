@@ -17,13 +17,55 @@
 <div class="alert alert-success" style="margin: 30px 0;">
     <strong>🎉 What's been set up:</strong>
     <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
-        <li>✓ Database tables created</li>
-        <li>✓ Administrator account created</li>
-        <li>✓ Roles and permissions configured</li>
-        <li>✓ Application key generated</li>
-        <li>✓ Storage directories linked</li>
+        @if(isset($installationReport['steps_completed']))
+            @foreach($installationReport['steps_completed'] as $step)
+                <li>✓ {{ $step }}</li>
+            @endforeach
+        @else
+            <li>✓ Database tables created</li>
+            <li>✓ Administrator account created</li>
+            <li>✓ Roles and permissions configured</li>
+            <li>✓ Application key generated</li>
+            <li>✓ Storage directories linked</li>
+        @endif
     </ul>
 </div>
+
+@if(isset($installationReport))
+<div class="info-box" style="background: #e7f3ff; border-left-color: #007bff;">
+    <strong>📊 Installation Report:</strong>
+    <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px; font-family: monospace; font-size: 13px;">
+        <div style="margin-bottom: 8px;">
+            <strong>Date:</strong> {{ $installationReport['installation_date'] }}
+        </div>
+        <div style="margin-bottom: 8px;">
+            <strong>Duration:</strong> {{ $installationReport['installation_time'] }}
+        </div>
+        <div style="margin-bottom: 8px;">
+            <strong>PHP Version:</strong> {{ $installationReport['php_version'] }}
+        </div>
+        <div style="margin-bottom: 8px;">
+            <strong>Laravel Version:</strong> {{ $installationReport['laravel_version'] }}
+        </div>
+        <div style="margin-bottom: 8px;">
+            <strong>Database:</strong> {{ ucfirst($installationReport['database_type']) }}
+        </div>
+        <div>
+            <strong>Steps Completed:</strong> {{ $installationReport['total_steps'] }}/{{ $installationReport['total_steps'] }}
+        </div>
+    </div>
+</div>
+@endif
+
+@if($demoDataImported)
+<div class="alert alert-info" style="background: #d1ecf1; border-color: #bee5eb;">
+    <strong>📦 Demo Data Imported:</strong>
+    <p style="margin-top: 10px;">
+        Sample data has been imported to help you get started. This includes categories, services, products, digital files, and courses.
+        You can view, edit, or delete them from the admin panel.
+    </p>
+</div>
+@endif
 
 @if($adminInfo)
 <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">

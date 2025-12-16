@@ -39,6 +39,18 @@
         <small>Re-enter your password</small>
     </div>
 
+    <div class="form-group" style="margin-top: 30px;">
+        <label style="display: flex; align-items: center; cursor: pointer; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px solid #e9ecef;">
+            <input type="checkbox" id="import_demo_data" name="import_demo_data" value="1" style="width: auto; margin-right: 10px; cursor: pointer;">
+            <div>
+                <strong>📦 Import Demo Data</strong>
+                <div style="font-size: 14px; color: #6c757d; margin-top: 5px;">
+                    Import sample categories, services, products, files, and courses for testing. You can delete them later from the admin panel.
+                </div>
+            </div>
+        </label>
+    </div>
+
     <div class="alert alert-warning">
         <strong>⚠️ Important Notice:</strong>
         <p style="margin-top: 10px;">

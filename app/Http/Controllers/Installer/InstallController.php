@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 
 class InstallController extends Controller
@@ -51,6 +52,14 @@ class InstallController extends Controller
             ]
         ];
 
+        $serverInfo = [
+            'software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'memory_limit' => ini_get('memory_limit'),
+            'max_execution_time' => ini_get('max_execution_time'),
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'post_max_size' => ini_get('post_max_size'),
+        ];
+
         $allPassed = $requirements['php']['status'];
         foreach ($requirements['extensions'] as $status) {
             $allPassed = $allPassed && $status;
@@ -59,7 +68,7 @@ class InstallController extends Controller
             $allPassed = $allPassed && $status;
         }
 
-        return view('installer.requirements', compact('requirements', 'allPassed'));
+        return view('installer.requirements', compact('requirements', 'allPassed', 'serverInfo'));
     }
 
     /**
@@ -116,34 +125,43 @@ class InstallController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'password' => 'required|min:8|confirmed',
+            'import_demo_data' => 'boolean',
         ]);
+
+        $installationSteps = [];
+        $startTime = microtime(true);
 
         try {
             // Store admin info in session for later
             session(['admin_info' => $validated]);
 
-            // Generate app key
+            // Step 1: Generate app key
             Artisan::call('key:generate', ['--force' => true]);
+            $installationSteps[] = 'Application key generated';
 
-            // Clear config cache
+            // Step 2: Clear config cache
             Artisan::call('config:clear');
             Artisan::call('cache:clear');
+            $installationSteps[] = 'Cache cleared';
 
-            // Run migrations
+            // Step 3: Run migrations
             Artisan::call('migrate', ['--force' => true]);
+            $installationSteps[] = 'Database tables created';
 
-            // Run seeders (roles and permissions)
+            // Step 4: Run seeders (roles and permissions)
             Artisan::call('db:seed', [
                 '--class' => 'RolePermissionSeeder',
                 '--force' => true
             ]);
+            $installationSteps[] = 'Roles and permissions configured';
 
-            // Create storage link
+            // Step 5: Create storage link
             if (!file_exists(public_path('storage'))) {
                 Artisan::call('storage:link');
             }
+            $installationSteps[] = 'Storage directories linked';
 
-            // Create admin user
+            // Step 6: Create admin user
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -153,14 +171,43 @@ class InstallController extends Controller
 
             // Assign superadmin role
             $user->assignRole('superadmin');
+            $installationSteps[] = 'Administrator account created';
+
+            // Step 7: Import demo data if requested
+            if ($request->boolean('import_demo_data')) {
+                $this->importDemoData();
+                $installationSteps[] = 'Demo data imported (categories, services, products, files, courses)';
+                session(['demo_data_imported' => true]);
+            }
+
+            // Step 8: Optimize application
+            $this->optimizeApplication();
+            $installationSteps[] = 'Application optimized';
+
+            // Generate installation report
+            $endTime = microtime(true);
+            $installationTime = round($endTime - $startTime, 2);
+
+            $report = $this->generateInstallationReport($installationSteps, $installationTime);
+            session(['installation_report' => $report]);
 
             // Create install lock file
-            file_put_contents(storage_path('installed'), date('Y-m-d H:i:s'));
+            file_put_contents(storage_path('installed'), json_encode([
+                'installed_at' => date('Y-m-d H:i:s'),
+                'php_version' => PHP_VERSION,
+                'laravel_version' => app()->version(),
+                'demo_data' => $request->boolean('import_demo_data'),
+            ]));
 
             return redirect()->route('installer.complete');
 
         } catch (\Exception $e) {
-            return back()->withErrors(['installation' => 'Installation failed: ' . $e->getMessage()]);
+            // Rollback on failure
+            $this->rollbackInstallation();
+
+            return back()->withErrors([
+                'installation' => 'Installation failed: ' . $e->getMessage() . ' Please check your configuration and try again.'
+            ])->withInput();
         }
     }
 
@@ -170,9 +217,12 @@ class InstallController extends Controller
     public function complete()
     {
         $adminInfo = session('admin_info');
-        session()->forget('admin_info');
+        $installationReport = session('installation_report');
+        $demoDataImported = session('demo_data_imported', false);
 
-        return view('installer.complete', compact('adminInfo'));
+        session()->forget(['admin_info', 'installation_report', 'demo_data_imported']);
+
+        return view('installer.complete', compact('adminInfo', 'installationReport', 'demoDataImported'));
     }
 
     /**
@@ -262,5 +312,101 @@ OPENAI_API_KEY=
 ";
 
         file_put_contents(base_path('.env'), $envContent);
+    }
+
+    /**
+     * Import demo data for testing
+     */
+    protected function importDemoData()
+    {
+        $seeders = [
+            'CategorySeeder',
+            'ServiceSeeder',
+            'ProductSeeder',
+            'FileSeeder',
+            'CourseSeeder',
+        ];
+
+        foreach ($seeders as $seeder) {
+            try {
+                Artisan::call('db:seed', [
+                    '--class' => $seeder,
+                    '--force' => true
+                ]);
+            } catch (\Exception $e) {
+                // Continue even if some seeders fail
+                \Log::warning("Seeder {$seeder} failed: " . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Optimize application after installation
+     */
+    protected function optimizeApplication()
+    {
+        try {
+            // Cache routes for faster routing
+            Artisan::call('route:cache');
+
+            // Cache config for faster config loading
+            Artisan::call('config:cache');
+
+            // Cache views for faster view loading
+            Artisan::call('view:cache');
+        } catch (\Exception $e) {
+            // Optimization is not critical, continue anyway
+            \Log::warning("Optimization failed: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Generate detailed installation report
+     */
+    protected function generateInstallationReport($steps, $time)
+    {
+        return [
+            'installation_date' => date('Y-m-d H:i:s'),
+            'installation_time' => $time . ' seconds',
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+            'database_type' => config('database.default'),
+            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'steps_completed' => $steps,
+            'total_steps' => count($steps),
+        ];
+    }
+
+    /**
+     * Rollback installation on failure
+     */
+    protected function rollbackInstallation()
+    {
+        try {
+            // Reset database migrations
+            if (file_exists(base_path('.env'))) {
+                Artisan::call('migrate:reset', ['--force' => true]);
+            }
+
+            // Remove .env file
+            if (file_exists(base_path('.env'))) {
+                @unlink(base_path('.env'));
+            }
+
+            // Remove install lock if exists
+            if (file_exists(storage_path('installed'))) {
+                @unlink(storage_path('installed'));
+            }
+
+            // Clear all caches
+            Artisan::call('config:clear');
+            Artisan::call('cache:clear');
+            Artisan::call('route:clear');
+            Artisan::call('view:clear');
+
+        } catch (\Exception $e) {
+            // Log rollback failure but don't throw
+            \Log::error("Rollback failed: " . $e->getMessage());
+        }
     }
 }

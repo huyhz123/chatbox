@@ -59,6 +59,22 @@
     </ul>
 </div>
 
+<!-- Server Information -->
+@if(isset($serverInfo))
+<div style="margin-bottom: 30px;">
+    <h3 style="margin-bottom: 15px; color: #555;">Server Information</h3>
+    <div class="info-box" style="background: #f8f9fa; border-left-color: #6c757d;">
+        <div style="font-family: monospace; font-size: 13px; line-height: 1.8;">
+            <div><strong>Server:</strong> {{ $serverInfo['software'] }}</div>
+            <div><strong>Memory Limit:</strong> {{ $serverInfo['memory_limit'] }}</div>
+            <div><strong>Max Execution Time:</strong> {{ $serverInfo['max_execution_time'] }}s</div>
+            <div><strong>Upload Max Filesize:</strong> {{ $serverInfo['upload_max_filesize'] }}</div>
+            <div><strong>Post Max Size:</strong> {{ $serverInfo['post_max_size'] }}</div>
+        </div>
+    </div>
+</div>
+@endif
+
 @if(!$allPassed)
 <div class="alert alert-danger">
     <strong>⚠️ Requirements Not Met</strong>
