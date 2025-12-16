@@ -1,0 +1,139 @@
+========================================
+  LARAVEL E-COMMERCE SYSTEM TEST
+========================================
+
+
+[0;34m[1/12] PHP Syntax Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Found 116 PHP files
+[0;32m✓ PASS[0m: All 116 PHP files have valid syntax
+
+[0;34m[2/12] Project Structure Validation[0m
+----------------------------------------
+[0;32m✓ PASS[0m: Directory exists: app/Models
+[0;32m✓ PASS[0m: Directory exists: app/Http/Controllers
+[0;32m✓ PASS[0m: Directory exists: app/Services
+[0;32m✓ PASS[0m: Directory exists: database/migrations
+[0;32m✓ PASS[0m: Directory exists: database/seeders
+[0;32m✓ PASS[0m: Directory exists: routes
+[0;32m✓ PASS[0m: Directory exists: resources/views
+[0;32m✓ PASS[0m: Directory exists: tests
+
+[0;34m[3/12] Database Migrations Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Found 13 migration files
+[0;32m✓ PASS[0m: Migration count adequate (13 files)
+[0;31m✗ FAIL[0m: Missing migration for table: users
+[0;31m✗ FAIL[0m: Missing migration for table: categories
+[0;31m✗ FAIL[0m: Missing migration for table: services
+[0;31m✗ FAIL[0m: Missing migration for table: products
+[0;31m✗ FAIL[0m: Missing migration for table: files
+[0;31m✗ FAIL[0m: Missing migration for table: courses
+[0;31m✗ FAIL[0m: Missing migration for table: orders
+[0;31m✗ FAIL[0m: Missing migration for table: payments
+[0;31m✗ FAIL[0m: Missing migration for table: tickets
+
+[0;34m[4/12] Eloquent Models Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Found 19 model files
+[0;32m✓ PASS[0m: Model User has relationships defined
+[0;32m✓ PASS[0m: Model Category has relationships defined
+[0;32m✓ PASS[0m: Model Service has relationships defined
+[0;32m✓ PASS[0m: Model Product has relationships defined
+[0;32m✓ PASS[0m: Model File has relationships defined
+[0;32m✓ PASS[0m: Model Course has relationships defined
+[0;32m✓ PASS[0m: Model Order has relationships defined
+[0;32m✓ PASS[0m: Model Payment has relationships defined
+[0;32m✓ PASS[0m: Model Ticket has relationships defined
+
+[0;34m[5/12] Controllers Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Admin Controllers: 11
+[0;34mℹ INFO[0m: Frontend Controllers: 10
+[0;32m✓ PASS[0m: Adequate admin controllers (11)
+[0;32m✓ PASS[0m: Adequate frontend controllers (10)
+[0;32m✓ PASS[0m: ProductController.php has CRUD methods (6/6)
+[0;32m✓ PASS[0m: ServiceController.php has CRUD methods (6/6)
+[0;32m✓ PASS[0m: CategoryController.php has CRUD methods (6/6)
+[0;32m✓ PASS[0m: FileController.php has CRUD methods (6/6)
+[0;32m✓ PASS[0m: CourseController.php has CRUD methods (6/6)
+
+[0;34m[6/12] Service Layer Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Found 15 service files
+[0;32m✓ PASS[0m: Service exists: PaymentService
+[0;32m✓ PASS[0m: Service exists: TicketService
+[0;32m✓ PASS[0m: Service exists: FileService
+[0;32m✓ PASS[0m: Service exists: CourseService
+[0;32m✓ PASS[0m: Service exists: ChatbotService
+
+[0;34m[7/12] Payment Gateways Validation[0m
+----------------------------------------
+[0;32m✓ PASS[0m: Payment gateway VNPayGateway has all required methods
+[0;32m✓ PASS[0m: Payment gateway MomoGateway has all required methods
+[0;32m✓ PASS[0m: Payment gateway ZaloPayGateway has all required methods
+[0;32m✓ PASS[0m: Payment gateway StripeGateway has all required methods
+[0;32m✓ PASS[0m: Payment gateway PayPalGateway has all required methods
+[0;32m✓ PASS[0m: Payment gateway USDTGateway has all required methods
+[0;32m✓ PASS[0m: Payment gateway FakeGateway has all required methods
+
+[0;34m[8/12] Routes Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Web routes defined: ~123
+[0;32m✓ PASS[0m: routes/web.php exists with routes
+[0;34mℹ INFO[0m: API routes defined: ~99
+[0;32m✓ PASS[0m: routes/api.php exists with routes
+
+[0;34m[9/12] Views Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Found 17 blade template files
+[0;32m✓ PASS[0m: Adequate view templates (17 files)
+[0;32m✓ PASS[0m: Frontend layout exists
+[0;32m✓ PASS[0m: Admin layout exists
+
+[0;34m[10/12] Multi-Language Validation[0m
+----------------------------------------
+[0;32m✓ PASS[0m: Language en has 12 translation files
+[0;32m✓ PASS[0m: Language vi has 12 translation files
+[0;32m✓ PASS[0m: Language zh has 12 translation files
+
+[0;34m[11/12] Seeders & Factories Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Found 10 seeders
+[0;34mℹ INFO[0m: Found 8 factories
+[0;32m✓ PASS[0m: Adequate seeders (10 files)
+[0;32m✓ PASS[0m: Adequate factories (8 files)
+
+[0;34m[12/12] Tests Validation[0m
+----------------------------------------
+[0;34mℹ INFO[0m: Unit Tests: 8
+[0;34mℹ INFO[0m: Feature Tests: 8
+[0;32m✓ PASS[0m: Good unit test coverage (8 files)
+[0;32m✓ PASS[0m: Good feature test coverage (8 files)
+
+[0;34m[BONUS] Configuration Files[0m
+----------------------------------------
+[0;32m✓ PASS[0m: Config file exists: app.php
+[0;32m✓ PASS[0m: Config file exists: database.php
+[0;32m✓ PASS[0m: Config file exists: payment.php
+[0;32m✓ PASS[0m: Config file exists: services.php
+[0;32m✓ PASS[0m: Config file exists: permission.php
+
+[0;34m[BONUS] Deployment Scripts[0m
+----------------------------------------
+[0;32m✓ PASS[0m: deploy.sh exists and is executable
+[0;32m✓ PASS[0m: DeployFullCommand exists
+[0;32m✓ PASS[0m: ValidateSystemCommand exists
+
+========================================
+  TEST SUMMARY
+========================================
+[0;32mPassed: 58[0m
+[0;31mFailed: 9[0m
+[1;33mWarnings: 0[0m
+
+Success Rate: [0;32m86%[0m
+
+[0;31m✗ SOME TESTS FAILED[0m
+
+Please fix the issues above before deployment.

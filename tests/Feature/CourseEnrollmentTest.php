@@ -187,7 +187,7 @@ class CourseEnrollmentTest extends TestCase
     }
 
     /** @test */
-    public void test_user_can_view_lesson_progress()
+    public function test_user_can_view_lesson_progress()
     {
         $user = User::factory()->create();
         $course = Course::factory()->create();

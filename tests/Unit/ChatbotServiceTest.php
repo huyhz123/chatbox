@@ -227,7 +227,7 @@ class ChatbotServiceTest extends TestCase
     }
 
     /** @test */
-    public void test_chat_conversation_limit_retrieved()
+    public function test_chat_conversation_limit_retrieved()
     {
         $sessionId = 'session-123';
         $conversation = $this->chatbotService->getOrCreateConversation($sessionId);
