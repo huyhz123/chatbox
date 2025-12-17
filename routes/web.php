@@ -167,6 +167,12 @@ Route::middleware(['web', 'locale'])->group(function () {
             Route::post('/add', [App\Http\Controllers\Frontend\WishlistController::class, 'add'])->name('add');
             Route::delete('/{wishlist}', [App\Http\Controllers\Frontend\WishlistController::class, 'remove'])->name('remove');
         });
+
+        // Voucher
+        Route::prefix('/voucher')->name('voucher.')->group(function () {
+            Route::post('/apply', [App\Http\Controllers\Frontend\VoucherController::class, 'apply'])->name('apply');
+            Route::post('/remove', [App\Http\Controllers\Frontend\VoucherController::class, 'remove'])->name('remove');
+        });
     });
 
     // ========================================================================

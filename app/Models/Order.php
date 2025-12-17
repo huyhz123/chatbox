@@ -23,8 +23,10 @@ class Order extends Model
         'transaction_id',
         'subtotal',
         'discount',
+        'discount_amount',
         'tax',
         'total',
+        'total_amount',
         'currency',
         'customer_name',
         'customer_email',
@@ -33,6 +35,9 @@ class Order extends Model
         'notes',
         'ip_address',
         'paid_at',
+        'shipping_method_id',
+        'shipping_cost',
+        'tracking_number',
     ];
 
     protected function casts(): array
@@ -70,6 +75,16 @@ class Order extends Model
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    public function shippingMethod()
+    {
+        return $this->belongsTo(ShippingMethod::class);
     }
 
     // Scopes
