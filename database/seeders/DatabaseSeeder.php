@@ -40,6 +40,12 @@ class DatabaseSeeder extends Seeder
         // 9. Create settings
         $this->call(SettingSeeder::class);
 
+        // 10. Create shipping methods
+        $this->call(ShippingMethodSeeder::class);
+
+        // 11. Create vouchers
+        $this->call(VoucherSeeder::class);
+
         echo "\n========================================\n";
         echo "Database seeding completed successfully!\n";
         echo "========================================\n\n";
@@ -62,6 +68,8 @@ class DatabaseSeeder extends Seeder
         echo "  - 20+ Courses with lessons\n";
         echo "  - 60+ Sample orders with order items\n";
         echo "  - 50+ System settings\n";
+        echo "  - 5 Shipping methods\n";
+        echo "  - 5 Voucher codes\n";
         echo "========================================\n";
     }
 }

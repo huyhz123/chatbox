@@ -160,6 +160,13 @@ Route::middleware(['web', 'locale'])->group(function () {
             Route::get('/{ticket}', [App\Http\Controllers\Frontend\TicketController::class, 'show'])->name('show');
             Route::post('/{ticket}/reply', [App\Http\Controllers\Frontend\TicketController::class, 'reply'])->name('reply');
         });
+
+        // Wishlist
+        Route::prefix('/wishlist')->name('wishlist.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Frontend\WishlistController::class, 'index'])->name('index');
+            Route::post('/add', [App\Http\Controllers\Frontend\WishlistController::class, 'add'])->name('add');
+            Route::delete('/{wishlist}', [App\Http\Controllers\Frontend\WishlistController::class, 'remove'])->name('remove');
+        });
     });
 
     // ========================================================================
