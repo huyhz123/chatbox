@@ -1,15 +1,17 @@
 import axios from 'axios';
 
-const API_URL = '/api';
+// API URL - sử dụng proxy trong dev, URL trực tiếp trong production
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10s timeout
 });
 
-// Add token to requests
+// Request interceptor - thêm token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,6 +21,46 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Response interceptor - xử lý lỗi
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const { response } = error;
+
+    // Xử lý lỗi theo status code
+    if (response) {
+      switch (response.status) {
+        case 401:
+          // Token hết hạn hoặc không hợp lệ
+          localStorage.removeItem('token');
+          // Redirect về login nếu không phải đang ở login
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+          break;
+        case 403:
+          // Không có quyền truy cập
+          console.error('Không có quyền truy cập');
+          break;
+        case 404:
+          console.error('Không tìm thấy tài nguyên');
+          break;
+        case 500:
+          console.error('Lỗi server');
+          break;
+        default:
+          break;
+      }
+    } else if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout');
+    } else if (!navigator.onLine) {
+      console.error('Không có kết nối mạng');
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 // Auth API
