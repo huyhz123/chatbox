@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             Route::middleware('web')
                 ->group(base_path('routes/installer.php'));
+
+            // Chat API Routes
+            Route::middleware('api')
+                ->group(base_path('routes/chat-api.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
