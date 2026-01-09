@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class ChatNotification extends Model
+{
+    use HasFactory;
+
+    protected $table = 'chat_notifications';
+
+    protected $fillable = [
+        'user_id',
+        'type',
+        'title',
+        'message',
+        'data',
+        'action_url',
+        'is_read',
+        'read_at',
+    ];
+
+    protected $casts = [
+        'data' => 'array',
+        'is_read' => 'boolean',
+        'read_at' => 'datetime',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(ChatUser::class, 'user_id');
+    }
+
+    public function markAsRead()
+    {
+        $this->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+    }
+}
