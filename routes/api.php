@@ -18,13 +18,13 @@ use Illuminate\Support\Facades\Route;
 // API HEALTH CHECK & VERSION
 // ============================================================================
 
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now(),
-        'version' => '1.0.0',
-    ]);
-})->name('health');
+use App\Http\Controllers\HealthController;
+
+Route::get('/health', [HealthController::class, 'health'])->name('health');
+Route::get('/health/detailed', [HealthController::class, 'detailed'])->name('health.detailed');
+Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
+Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
+Route::get('/metrics', [HealthController::class, 'metrics'])->name('metrics');
 
 // ============================================================================
 // PUBLIC API ROUTES - No authentication required

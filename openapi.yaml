@@ -1,0 +1,619 @@
+openapi: 3.0.3
+info:
+  title: Multilingual Chat & Social Network Platform API
+  description: |
+    Complete REST API for a feature-rich social networking platform with real-time chat,
+    live streaming, voice rooms, mini-games, and more.
+
+    ## Features
+    - Real-time Chat & Messaging
+    - Live Streaming with Agora.io
+    - Voice Chat Rooms
+    - Short Videos & Stories
+    - Virtual Economy & Gifts
+    - VIP Membership System
+    - Dating & Matching
+    - Guild/Clan System
+    - Mini Games & Karaoke
+    - Gamification (Levels, Badges, Missions)
+
+    ## Authentication
+    All endpoints except authentication routes require a Bearer token.
+    Include it in the Authorization header: `Authorization: Bearer {token}`
+
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@chatbox.com
+  license:
+    name: Proprietary
+    url: https://chatbox.com/license
+
+servers:
+  - url: http://localhost:8000/api/v1/chat
+    description: Local development server
+  - url: https://api.chatbox.com/v1/chat
+    description: Production server
+  - url: https://staging-api.chatbox.com/v1/chat
+    description: Staging server
+
+tags:
+  - name: Authentication
+    description: User authentication and registration
+  - name: Users
+    description: User profile and account management
+  - name: Chat
+    description: Real-time messaging
+  - name: Live Streaming
+    description: Live video streaming
+  - name: Rooms
+    description: Voice chat rooms
+  - name: Videos
+    description: Short videos
+  - name: Stories
+    description: 24-hour stories
+  - name: Posts
+    description: Social feed posts
+  - name: Gifts
+    description: Virtual gifts
+  - name: Games
+    description: Mini games
+  - name: Karaoke
+    description: Karaoke system
+  - name: Dating
+    description: Dating and matching
+  - name: Guilds
+    description: Guild/clan system
+  - name: Missions
+    description: Missions and achievements
+  - name: Rankings
+    description: Leaderboards
+  - name: Payments
+    description: Payment and VIP
+  - name: Notifications
+    description: Notification management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        full_name:
+          type: string
+          example: "John Doe"
+        avatar:
+          type: string
+          nullable: true
+          example: "https://example.com/avatars/john.jpg"
+        cover_photo:
+          type: string
+          nullable: true
+        level:
+          type: integer
+          example: 25
+        exp:
+          type: integer
+          example: 12500
+        vip_level:
+          type: integer
+          example: 3
+        balance:
+          type: number
+          format: float
+          example: 10000.50
+        is_verified:
+          type: boolean
+          example: true
+        is_online:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [private, group]
+        name:
+          type: string
+          nullable: true
+        avatar:
+          type: string
+          nullable: true
+        last_message:
+          $ref: '#/components/schemas/Message'
+        unread_count:
+          type: integer
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversation_id:
+          type: integer
+        sender_id:
+          type: integer
+        type:
+          type: string
+          enum: [text, image, audio, video, file, gift, sticker, location]
+        content:
+          type: string
+        media_url:
+          type: string
+          nullable: true
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        sender:
+          $ref: '#/components/schemas/User'
+
+    LiveStream:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        thumbnail:
+          type: string
+          nullable: true
+        agora_channel:
+          type: string
+        viewer_count:
+          type: integer
+        total_views:
+          type: integer
+        status:
+          type: string
+          enum: [live, ended]
+        started_at:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error message"
+        errors:
+          type: object
+          additionalProperties: true
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+        data:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: "Unauthenticated."
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: "The given data was invalid."
+            errors:
+              email: ["The email field is required."]
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: "Resource not found."
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password, password_confirmation]
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                  nullable: true
+                password:
+                  type: string
+                  minLength: 8
+                password_confirmation:
+                  type: string
+                full_name:
+                  type: string
+                  nullable: true
+                country:
+                  type: string
+                  nullable: true
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [login, password]
+              properties:
+                login:
+                  type: string
+                  description: Username, email, or phone
+                password:
+                  type: string
+                remember:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout user
+      responses:
+        '200':
+          description: Logout successful
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      responses:
+        '200':
+          description: Current user data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  # Chat Endpoints
+  /conversations:
+    get:
+      tags: [Chat]
+      summary: Get user's conversations
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Conversation'
+                      current_page:
+                        type: integer
+                      total:
+                        type: integer
+
+  /conversations/{conversationId}/messages:
+    get:
+      tags: [Chat]
+      summary: Get messages in conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+
+    post:
+      tags: [Chat]
+      summary: Send message
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, content]
+              properties:
+                type:
+                  type: string
+                  enum: [text, image, audio, video, file, gift, sticker, location]
+                content:
+                  type: string
+                media:
+                  type: string
+                  format: binary
+                  nullable: true
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Message'
+
+  # Live Streaming Endpoints
+  /streams:
+    get:
+      tags: [Live Streaming]
+      summary: Get active live streams
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of live streams
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LiveStream'
+
+    post:
+      tags: [Live Streaming]
+      summary: Start live stream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                thumbnail:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Stream started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      stream:
+                        $ref: '#/components/schemas/LiveStream'
+                      agora_token:
+                        type: string
+                      agora_channel:
+                        type: string
+
+  /streams/{streamId}/end:
+    post:
+      tags: [Live Streaming]
+      summary: End live stream
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Stream ended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /streams/{streamId}/join:
+    post:
+      tags: [Live Streaming]
+      summary: Join live stream as viewer
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Joined stream
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      stream:
+                        $ref: '#/components/schemas/LiveStream'
+                      agora_token:
+                        type: string
+
+  # Additional endpoints would follow the same pattern...
+  # For brevity, the full 100+ endpoints are not all listed here
+  # See routes/chat-api.php for complete endpoint list

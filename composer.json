@@ -1,14 +1,15 @@
 {
-    "name": "laravel/laravel-ecommerce",
+    "name": "laravel/multilingual-chat-app",
     "type": "project",
-    "description": "Laravel 11 E-commerce Platform for Services, Files & Courses",
-    "keywords": ["laravel", "framework", "ecommerce", "services", "digital products"],
+    "description": "Laravel 11 Multilingual Chat & Social Network Platform",
+    "keywords": ["laravel", "chat", "social network", "webrtc", "websocket", "live streaming"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "laravel/reverb": "^1.0",
         "laravel/horizon": "^5.21",
         "spatie/laravel-permission": "^6.3",
         "spatie/laravel-activitylog": "^4.8",
@@ -20,7 +21,14 @@
         "stripe/stripe-php": "^13.8",
         "phpoffice/phpspreadsheet": "^1.29",
         "intervention/image": "^3.5",
-        "predis/predis": "^2.2"
+        "predis/predis": "^2.2",
+        "laravel/socialite": "^5.11",
+        "aws/aws-sdk-php": "^3.294",
+        "spatie/laravel-medialibrary": "^11.4",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "tymon/jwt-auth": "^2.0",
+        "stichoza/google-translate-php": "^5.1",
+        "pbmedia/laravel-ffmpeg": "^8.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

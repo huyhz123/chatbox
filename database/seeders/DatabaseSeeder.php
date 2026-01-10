@@ -47,6 +47,18 @@ class DatabaseSeeder extends Seeder
         $this->call(VoucherSeeder::class);
 
         echo "\n========================================\n";
+        echo "CHAT APP SEEDING...\n";
+        echo "========================================\n\n";
+
+        // Chat App Seeders
+        $this->call(VipPackageSeeder::class);
+        $this->call(GiftSeeder::class);
+        $this->call(SongSeeder::class);
+        $this->call(BadgeSeeder::class);
+        $this->call(GameSeeder::class);
+        $this->call(MissionSeeder::class);
+
+        echo "\n========================================\n";
         echo "Database seeding completed successfully!\n";
         echo "========================================\n\n";
         echo "Sample Credentials:\n";
@@ -69,7 +81,14 @@ class DatabaseSeeder extends Seeder
         echo "  - 60+ Sample orders with order items\n";
         echo "  - 50+ System settings\n";
         echo "  - 5 Shipping methods\n";
-        echo "  - 5 Voucher codes\n";
+        echo "  - 5 Voucher codes\n\n";
+        echo "Chat App Data Created:\n";
+        echo "  - 7 VIP Packages (Bronze → Emperor)\n";
+        echo "  - 44 Gifts (Free, Basic, Special, VIP, Lucky)\n";
+        echo "  - 60 Karaoke Songs (Vietnamese, English, K-Pop)\n";
+        echo "  - 20 Achievement Badges (Common → Legendary)\n";
+        echo "  - 12 Mini Games (Board, Card, Dice, Quiz, etc.)\n";
+        echo "  - 24 Missions (10 Daily, 10 Weekly, 4 Event)\n";
         echo "========================================\n";
     }
 }
