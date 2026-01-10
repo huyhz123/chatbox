@@ -2,6 +2,18 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\SocialAuthController;
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\GiftController;
+use App\Http\Controllers\API\PostController;
+use App\Http\Controllers\API\ChatController;
+use App\Http\Controllers\API\LiveStreamController;
+use App\Http\Controllers\API\RoomController;
+use App\Http\Controllers\API\VideoController;
+use App\Http\Controllers\API\StoryController;
+use App\Http\Controllers\API\KaraokeController;
+use App\Http\Controllers\API\GameController;
+use App\Http\Controllers\API\RankingController;
+use App\Http\Controllers\API\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -86,17 +98,37 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // Chat & Messaging
         Route::prefix('conversations')->name('chat.conversations.')->group(function () {
-            // TODO: ChatController routes
+            Route::get('/', [ChatController::class, 'conversations'])->name('index');
+            Route::get('/unread-count', [ChatController::class, 'unreadCount'])->name('unread');
+            Route::post('/{userId}', [ChatController::class, 'getOrCreateConversation'])->name('create');
+            Route::get('/{id}/messages', [ChatController::class, 'getMessages'])->name('messages');
+            Route::post('/{id}/messages', [ChatController::class, 'sendMessage'])->name('send');
+            Route::post('/{id}/read', [ChatController::class, 'markAsRead'])->name('read');
+            Route::get('/{id}/search', [ChatController::class, 'searchMessages'])->name('search');
+            Route::delete('/messages/{id}', [ChatController::class, 'deleteMessage'])->name('message.delete');
         });
 
         // Rooms
         Route::prefix('rooms')->name('chat.rooms.')->group(function () {
-            // TODO: RoomController routes
+            Route::get('/', [RoomController::class, 'index'])->name('index');
+            Route::post('/', [RoomController::class, 'store'])->name('store');
+            Route::get('/{id}', [RoomController::class, 'show'])->name('show');
+            Route::post('/{id}/join', [RoomController::class, 'join'])->name('join');
+            Route::post('/{id}/leave', [RoomController::class, 'leave'])->name('leave');
+            Route::post('/{id}/toggle-mute', [RoomController::class, 'toggleMute'])->name('mute');
+            Route::delete('/{roomId}/users/{userId}', [RoomController::class, 'kickUser'])->name('kick');
         });
 
         // Live Streaming
         Route::prefix('streams')->name('chat.streams.')->group(function () {
-            // TODO: LiveStreamController routes
+            Route::get('/', [LiveStreamController::class, 'index'])->name('index');
+            Route::get('/{id}', [LiveStreamController::class, 'show'])->name('show');
+            Route::post('/', [LiveStreamController::class, 'start'])->name('start');
+            Route::post('/{id}/end', [LiveStreamController::class, 'end'])->name('end');
+            Route::post('/{id}/join', [LiveStreamController::class, 'join'])->name('join');
+            Route::post('/{id}/gift', [LiveStreamController::class, 'sendGift'])->name('gift');
+            Route::post('/{id}/pk', [LiveStreamController::class, 'startPK'])->name('pk');
+            Route::get('/history', [LiveStreamController::class, 'history'])->name('history');
         });
 
         // Gifts
@@ -111,22 +143,43 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // Videos (Short Videos)
         Route::prefix('videos')->name('chat.videos.')->group(function () {
-            // TODO: VideoController routes
+            Route::get('/feed', [VideoController::class, 'feed'])->name('feed');
+            Route::get('/user/{userId}', [VideoController::class, 'userVideos'])->name('user');
+            Route::post('/', [VideoController::class, 'upload'])->name('upload');
+            Route::post('/{id}/like', [VideoController::class, 'toggleLike'])->name('like');
+            Route::post('/{id}/view', [VideoController::class, 'incrementView'])->name('view');
+            Route::get('/{id}/comments', [VideoController::class, 'getComments'])->name('comments');
+            Route::post('/{id}/comments', [VideoController::class, 'addComment'])->name('comment');
+            Route::delete('/{id}', [VideoController::class, 'delete'])->name('delete');
         });
 
         // Stories
         Route::prefix('stories')->name('chat.stories.')->group(function () {
-            // TODO: StoryController routes
+            Route::get('/', [StoryController::class, 'index'])->name('index');
+            Route::get('/user/{userId}', [StoryController::class, 'userStories'])->name('user');
+            Route::post('/', [StoryController::class, 'store'])->name('store');
+            Route::post('/{id}/view', [StoryController::class, 'view'])->name('view');
+            Route::get('/{id}/viewers', [StoryController::class, 'viewers'])->name('viewers');
+            Route::delete('/{id}', [StoryController::class, 'delete'])->name('delete');
         });
 
         // Games
         Route::prefix('games')->name('chat.games.')->group(function () {
-            // TODO: GameController routes
+            Route::get('/', [GameController::class, 'index'])->name('index');
+            Route::get('/{id}', [GameController::class, 'show'])->name('show');
+            Route::post('/{id}/start', [GameController::class, 'startSession'])->name('start');
+            Route::post('/sessions/{id}/score', [GameController::class, 'submitScore'])->name('score');
+            Route::get('/{id}/leaderboard', [GameController::class, 'leaderboard'])->name('leaderboard');
+            Route::get('/history', [GameController::class, 'history'])->name('history');
         });
 
         // Karaoke
         Route::prefix('karaoke')->name('chat.karaoke.')->group(function () {
-            // TODO: KaraokeController routes
+            Route::get('/songs', [KaraokeController::class, 'songs'])->name('songs');
+            Route::post('/start', [KaraokeController::class, 'startSession'])->name('start');
+            Route::post('/sessions/{id}/score', [KaraokeController::class, 'submitScore'])->name('score');
+            Route::get('/leaderboard', [KaraokeController::class, 'leaderboard'])->name('leaderboard');
+            Route::get('/history', [KaraokeController::class, 'history'])->name('history');
         });
 
         // Guilds
@@ -141,7 +194,8 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // Rankings
         Route::prefix('rankings')->name('chat.rankings.')->group(function () {
-            // TODO: RankingController routes
+            Route::get('/', [RankingController::class, 'index'])->name('index');
+            Route::get('/me', [RankingController::class, 'userRank'])->name('user');
         });
 
         // Missions
@@ -156,7 +210,10 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // Payment & Coins
         Route::prefix('payments')->name('chat.payments.')->group(function () {
-            // TODO: PaymentController routes
+            Route::get('/packages/coins', [PaymentController::class, 'coinPackages'])->name('packages.coins');
+            Route::post('/purchase/coins', [PaymentController::class, 'purchaseCoins'])->name('purchase.coins');
+            Route::post('/purchase/vip', [PaymentController::class, 'purchaseVip'])->name('purchase.vip');
+            Route::get('/history', [PaymentController::class, 'transactionHistory'])->name('history');
         });
 
         // VIP Packages
@@ -209,19 +266,13 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 Route::prefix('webhooks')->name('chat.webhooks.')->group(function () {
 
     // VNPAY
-    Route::post('/vnpay', function () {
-        // TODO: VNPAY webhook handler
-    })->name('vnpay');
+    Route::any('/vnpay', [PaymentController::class, 'vnpayCallback'])->name('vnpay');
 
     // MoMo
-    Route::post('/momo', function () {
-        // TODO: MoMo webhook handler
-    })->name('momo');
+    Route::any('/momo', [PaymentController::class, 'momoCallback'])->name('momo');
 
     // ZaloPay
-    Route::post('/zalopay', function () {
-        // TODO: ZaloPay webhook handler
-    })->name('zalopay');
+    Route::any('/zalopay', [PaymentController::class, 'zaloPayCallback'])->name('zalopay');
 
 });
 
