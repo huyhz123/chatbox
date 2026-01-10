@@ -1,0 +1,235 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'claude/*' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # PHP Linting and Static Analysis
+  php-lint:
+    name: PHP Lint & Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json, redis
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run PHP syntax check
+        run: find app -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Run PHPStan (if configured)
+        run: |
+          if [ -f "phpstan.neon" ]; then
+            ./vendor/bin/phpstan analyse --memory-limit=2G
+          else
+            echo "PHPStan not configured, skipping"
+          fi
+        continue-on-error: true
+
+  # Laravel Tests
+  laravel-tests:
+    name: Laravel Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json, redis
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Set testing environment
+        run: |
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=testing" >> .env
+          echo "DB_USERNAME=root" >> .env
+          echo "DB_PASSWORD=password" >> .env
+          echo "REDIS_HOST=127.0.0.1" >> .env
+          echo "REDIS_PORT=6379" >> .env
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+
+      - name: Run tests
+        run: php artisan test --parallel --coverage
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  # Frontend Build and Lint
+  frontend-build:
+    name: Frontend Build & Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint (if configured)
+        run: |
+          if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
+            npm run lint
+          else
+            echo "ESLint not configured, skipping"
+          fi
+        continue-on-error: true
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Check build output
+        run: |
+          if [ ! -d "public/build" ]; then
+            echo "Build failed - public/build directory not found"
+            exit 1
+          fi
+
+  # Security Scanning
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run security checker
+        run: |
+          composer require --dev enlightn/security-checker
+          ./vendor/bin/security-checker security:check composer.lock
+        continue-on-error: true
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  # Code Quality
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run PHP CS Fixer (if configured)
+        run: |
+          if [ -f ".php-cs-fixer.php" ]; then
+            ./vendor/bin/php-cs-fixer fix --dry-run --diff
+          else
+            echo "PHP CS Fixer not configured, skipping"
+          fi
+        continue-on-error: true
+
+  # Docker Build Test
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: chatbox:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Docker Compose
+        run: |
+          cp .env.example .env
+          docker-compose config
