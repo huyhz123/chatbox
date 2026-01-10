@@ -71,7 +71,9 @@
     "online": "Online",
     "offline": "Offline",
     "typing": "Typing...",
-    "no_conversations": "No conversations yet"
+    "no_conversations": "No conversations yet",
+    "search": "Search conversations...",
+    "select_conversation": "Select a conversation to start chatting"
   },
   "gift": {
     "send_gift": "Send Gift",

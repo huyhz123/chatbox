@@ -71,7 +71,9 @@
     "online": "Trực tuyến",
     "offline": "Ngoại tuyến",
     "typing": "Đang nhập...",
-    "no_conversations": "Chưa có cuộc trò chuyện nào"
+    "no_conversations": "Chưa có cuộc trò chuyện nào",
+    "search": "Tìm kiếm cuộc trò chuyện...",
+    "select_conversation": "Chọn một cuộc trò chuyện để bắt đầu"
   },
   "gift": {
     "send_gift": "Tặng quà",
