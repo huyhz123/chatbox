@@ -14,6 +14,10 @@ use App\Http\Controllers\API\KaraokeController;
 use App\Http\Controllers\API\GameController;
 use App\Http\Controllers\API\RankingController;
 use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\API\GuildController;
+use App\Http\Controllers\API\DatingController;
+use App\Http\Controllers\API\MissionController;
+use App\Http\Controllers\API\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -88,12 +92,20 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // User Profile & Settings
         Route::prefix('user')->name('chat.user.')->group(function () {
-            // TODO: UserController routes
+            Route::get('/{id}', [UserController::class, 'show'])->name('show');
+            Route::put('/profile', [UserController::class, 'updateProfile'])->name('update');
+            Route::post('/avatar', [UserController::class, 'uploadAvatar'])->name('avatar');
+            Route::post('/cover-photo', [UserController::class, 'uploadCoverPhoto'])->name('cover');
         });
 
         // Friends & Social
         Route::prefix('friends')->name('chat.friends.')->group(function () {
-            // TODO: FriendController routes
+            Route::get('/', [UserController::class, 'friends'])->name('index');
+            Route::post('/{userId}', [UserController::class, 'sendFriendRequest'])->name('send');
+            Route::post('/{userId}/accept', [UserController::class, 'acceptFriendRequest'])->name('accept');
+            Route::delete('/{userId}', [UserController::class, 'removeFriend'])->name('remove');
+            Route::post('/{userId}/follow', [UserController::class, 'follow'])->name('follow');
+            Route::delete('/{userId}/unfollow', [UserController::class, 'unfollow'])->name('unfollow');
         });
 
         // Chat & Messaging
@@ -133,12 +145,22 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // Gifts
         Route::prefix('gifts')->name('chat.gifts.')->group(function () {
-            // TODO: GiftController routes
+            Route::get('/', [GiftController::class, 'index'])->name('index');
+            Route::post('/send', [GiftController::class, 'send'])->name('send');
+            Route::get('/history', [GiftController::class, 'history'])->name('history');
+            Route::get('/top-gifters', [GiftController::class, 'topGifters'])->name('top_gifters');
+            Route::get('/top-receivers', [GiftController::class, 'topReceivers'])->name('top_receivers');
         });
 
         // Posts & Feed
         Route::prefix('posts')->name('chat.posts.')->group(function () {
-            // TODO: PostController routes
+            Route::get('/feed', [PostController::class, 'feed'])->name('feed');
+            Route::post('/', [PostController::class, 'create'])->name('create');
+            Route::get('/{id}', [PostController::class, 'show'])->name('show');
+            Route::delete('/{id}', [PostController::class, 'delete'])->name('delete');
+            Route::post('/{id}/react', [PostController::class, 'react'])->name('react');
+            Route::post('/{id}/comment', [PostController::class, 'comment'])->name('comment');
+            Route::get('/{id}/comments', [PostController::class, 'comments'])->name('comments');
         });
 
         // Videos (Short Videos)
@@ -184,12 +206,26 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // Guilds
         Route::prefix('guilds')->name('chat.guilds.')->group(function () {
-            // TODO: GuildController routes
+            Route::get('/', [GuildController::class, 'index'])->name('index');
+            Route::post('/', [GuildController::class, 'store'])->name('store');
+            Route::get('/{id}', [GuildController::class, 'show'])->name('show');
+            Route::post('/{id}/join', [GuildController::class, 'join'])->name('join');
+            Route::post('/{id}/leave', [GuildController::class, 'leave'])->name('leave');
+            Route::delete('/{guildId}/members/{userId}', [GuildController::class, 'kickMember'])->name('kick');
+            Route::post('/{guildId}/members/{userId}/promote', [GuildController::class, 'promoteMember'])->name('promote');
+            Route::post('/{id}/donate', [GuildController::class, 'donate'])->name('donate');
+            Route::get('/{id}/members', [GuildController::class, 'members'])->name('members');
         });
 
         // Dating
         Route::prefix('dating')->name('chat.dating.')->group(function () {
-            // TODO: DatingController routes
+            Route::get('/profile', [DatingController::class, 'getProfile'])->name('profile');
+            Route::put('/profile', [DatingController::class, 'updateProfile'])->name('update_profile');
+            Route::get('/discover', [DatingController::class, 'discover'])->name('discover');
+            Route::post('/swipe', [DatingController::class, 'swipe'])->name('swipe');
+            Route::get('/matches', [DatingController::class, 'matches'])->name('matches');
+            Route::delete('/matches/{id}', [DatingController::class, 'unmatch'])->name('unmatch');
+            Route::get('/likes', [DatingController::class, 'likesReceived'])->name('likes');
         });
 
         // Rankings
@@ -200,12 +236,23 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // Missions
         Route::prefix('missions')->name('chat.missions.')->group(function () {
-            // TODO: MissionController routes
+            Route::get('/', [MissionController::class, 'index'])->name('index');
+            Route::get('/my', [MissionController::class, 'myMissions'])->name('my');
+            Route::post('/{id}/claim', [MissionController::class, 'claim'])->name('claim');
+            Route::get('/daily', [MissionController::class, 'dailyMissions'])->name('daily');
+            Route::get('/achievements', [MissionController::class, 'achievements'])->name('achievements');
         });
 
         // Notifications
         Route::prefix('notifications')->name('chat.notifications.')->group(function () {
-            // TODO: NotificationController routes
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread');
+            Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+            Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read_all');
+            Route::delete('/{id}', [NotificationController::class, 'delete'])->name('delete');
+            Route::delete('/read/all', [NotificationController::class, 'deleteAllRead'])->name('delete_read');
+            Route::get('/settings', [NotificationController::class, 'getSettings'])->name('settings');
+            Route::put('/settings', [NotificationController::class, 'updateSettings'])->name('update_settings');
         });
 
         // Payment & Coins
@@ -218,7 +265,8 @@ Route::prefix('v1/chat')->middleware('api')->group(function () {
 
         // VIP Packages
         Route::prefix('vip')->name('chat.vip.')->group(function () {
-            // TODO: VIPController routes
+            Route::get('/packages', [PaymentController::class, 'vipPackages'])->name('packages');
+            Route::get('/my-status', [PaymentController::class, 'myVipStatus'])->name('status');
         });
 
     });

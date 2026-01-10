@@ -398,4 +398,59 @@ class PaymentController extends Controller
         // TODO: Implement actual ZaloPay URL generation
         return 'https://sb-openapi.zalopay.vn/v2/create?app_trans_id=' . $transaction->id;
     }
+
+    /**
+     * Get VIP packages
+     */
+    public function vipPackages(Request $request): JsonResponse
+    {
+        try {
+            $packages = VipPackage::orderBy('level', 'asc')->get();
+
+            return response()->json([
+                'success' => true,
+                'packages' => $packages,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch VIP packages',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get user's VIP status
+     */
+    public function myVipStatus(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+
+            $status = [
+                'is_vip' => $user->isVip(),
+                'vip_level' => $user->vip_level,
+                'vip_expires_at' => $user->vip_expires_at,
+                'days_remaining' => $user->vip_expires_at ? now()->diffInDays($user->vip_expires_at) : 0,
+            ];
+
+            // Get current VIP package benefits
+            if ($user->vip_level > 0) {
+                $package = VipPackage::where('level', $user->vip_level)->first();
+                $status['benefits'] = $package ? json_decode($package->benefits, true) : [];
+            }
+
+            return response()->json([
+                'success' => true,
+                'status' => $status,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch VIP status',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
