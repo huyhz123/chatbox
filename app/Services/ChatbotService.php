@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\ChatbotConversation;
 use App\Models\ChatbotMessage;
-use App\Models\Service;
 use App\Models\File;
 use Illuminate\Support\Facades\Http;
 
@@ -65,17 +64,7 @@ class ChatbotService
     {
         $message = strtolower($message);
 
-        // Services query
-        if (str_contains($message, 'dịch vụ') || str_contains($message, 'service')) {
-            $services = Service::active()->limit(5)->get(['name', 'price']);
-            $response = "Đây là một số dịch vụ của chúng tôi:\n";
-            foreach ($services as $service) {
-                $response .= "- {$service->name}: " . number_format($service->price) . " VND\n";
-            }
-            return $response;
-        }
-
-        // Files/Courses query
+        // Files query
         if (str_contains($message, 'file') || str_contains($message, 'tài liệu')) {
             $files = File::active()->limit(5)->get(['name', 'price']);
             $response = "Đây là một số file/tài liệu:\n";

@@ -11,7 +11,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed in the correct order to respect dependencies
+        echo "\n========================================\n";
+        echo "MULTILINGUAL CHAT PLATFORM SEEDING\n";
+        echo "========================================\n\n";
 
         // 1. Create roles and permissions first
         $this->call(RolePermissionSeeder::class);
@@ -19,38 +21,13 @@ class DatabaseSeeder extends Seeder
         // 2. Create users with roles
         $this->call(UserSeeder::class);
 
-        // 3. Create categories for all types
-        $this->call(CategorySeeder::class);
-
-        // 4. Create services
-        $this->call(ServiceSeeder::class);
-
-        // 5. Create products
-        $this->call(ProductSeeder::class);
-
-        // 6. Create files
+        // 3. Create files (for file sharing)
         $this->call(FileSeeder::class);
 
-        // 7. Create courses with lessons
-        $this->call(CourseSeeder::class);
-
-        // 8. Create orders with order items
-        $this->call(OrderSeeder::class);
-
-        // 9. Create settings
+        // 4. Create settings
         $this->call(SettingSeeder::class);
 
-        // 10. Create shipping methods
-        $this->call(ShippingMethodSeeder::class);
-
-        // 11. Create vouchers
-        $this->call(VoucherSeeder::class);
-
-        echo "\n========================================\n";
-        echo "CHAT APP SEEDING...\n";
-        echo "========================================\n\n";
-
-        // Chat App Seeders
+        // 5. Chat Platform Features
         $this->call(VipPackageSeeder::class);
         $this->call(GiftSeeder::class);
         $this->call(SongSeeder::class);
@@ -61,6 +38,7 @@ class DatabaseSeeder extends Seeder
         echo "\n========================================\n";
         echo "Database seeding completed successfully!\n";
         echo "========================================\n\n";
+
         echo "Sample Credentials:\n";
         echo "  Superadmin Email: superadmin@example.com\n";
         echo "  Superadmin Password: superadmin123\n";
@@ -68,27 +46,18 @@ class DatabaseSeeder extends Seeder
         echo "  Admin Password: admin123\n";
         echo "  Customer Email: customer1@example.com (and customer2-10)\n";
         echo "  Customer Password: customer123\n\n";
-        echo "Data Created:\n";
-        echo "  - 3 Roles (superadmin, admin, customer)\n";
-        echo "  - 1 Superadmin user\n";
-        echo "  - 1 Admin user\n";
-        echo "  - 30+ Customer users\n";
-        echo "  - 20 Categories (5 service, 5 product, 4 file, 5 course)\n";
-        echo "  - 22+ Services\n";
-        echo "  - 25+ Products\n";
-        echo "  - 17 Digital files\n";
-        echo "  - 20+ Courses with lessons\n";
-        echo "  - 60+ Sample orders with order items\n";
-        echo "  - 50+ System settings\n";
-        echo "  - 5 Shipping methods\n";
-        echo "  - 5 Voucher codes\n\n";
-        echo "Chat App Data Created:\n";
+
+        echo "Chat Platform Data Created:\n";
+        echo "  - 3 Roles (superadmin, admin, user)\n";
+        echo "  - 30+ Users\n";
         echo "  - 7 VIP Packages (Bronze → Emperor)\n";
         echo "  - 44 Gifts (Free, Basic, Special, VIP, Lucky)\n";
         echo "  - 60 Karaoke Songs (Vietnamese, English, K-Pop)\n";
         echo "  - 20 Achievement Badges (Common → Legendary)\n";
         echo "  - 12 Mini Games (Board, Card, Dice, Quiz, etc.)\n";
         echo "  - 24 Missions (10 Daily, 10 Weekly, 4 Event)\n";
+        echo "  - Digital files for sharing\n";
+        echo "  - System settings\n";
         echo "========================================\n";
     }
 }

@@ -21,9 +21,6 @@ class FileService
         // Increment sold count
         $file->incrementSoldCount();
 
-        // Send notification
-        app(NotificationService::class)->sendFileUnlocked($user, $file);
-
         return $download;
     }
 
