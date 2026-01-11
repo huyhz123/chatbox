@@ -2,7 +2,7 @@
 
 namespace App\Services\PaymentGateways;
 
-use App\Models\Order;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Payment;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -25,12 +25,12 @@ class FakeGateway
      * Create a fake payment and return test data
      * Used for sandbox testing without actual payment processing
      *
-     * @param Order $order
+     * @param Model $payable
      * @param Payment $payment
      * @param array $data
      * @return array
      */
-    public function createPayment(Order $order, Payment $payment, array $data = [])
+    public function createPayment(Model $payable, Payment $payment, array $data = [])
     {
         try {
             $fakeTransactionId = 'FAKE-' . Str::uuid();
@@ -40,7 +40,7 @@ class FakeGateway
             ]);
 
             Log::info('Fake payment created', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'fake_transaction_id' => $fakeTransactionId,
             ]);
@@ -58,7 +58,7 @@ class FakeGateway
             ];
         } catch (Exception $e) {
             Log::error('Fake payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;
@@ -205,15 +205,15 @@ class FakeGateway
     /**
      * Get test payment data
      *
-     * @param Order $order
+     * @param Model $payable
      * @param Payment $payment
      * @return array
      */
-    public function getTestData(Order $order, Payment $payment)
+    public function getTestData(Model $payable, Payment $payment)
     {
         return [
             'test_mode' => true,
-            'order_id' => $order->id,
+            'order_id' => $payable->id,
             'payment_id' => $payment->id,
             'amount' => $payment->amount,
             'currency' => $payment->currency,

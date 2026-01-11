@@ -2,7 +2,7 @@
 
 namespace App\Services\PaymentGateways;
 
-use App\Models\Order;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Payment;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -24,12 +24,12 @@ class ZaloPayGateway
     /**
      * Create a payment and return payment data
      *
-     * @param Order $order
+     * @param Model $payable
      * @param Payment $payment
      * @param array $data
      * @return array
      */
-    public function createPayment(Order $order, Payment $payment, array $data = [])
+    public function createPayment(Model $payable, Payment $payment, array $data = [])
     {
         try {
             $appId = $this->config['app_id'];
@@ -42,7 +42,7 @@ class ZaloPayGateway
             $amount = (int)($payment->amount * 100); // ZaloPay uses smallest unit
 
             $embedData = [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
             ];
 
@@ -63,7 +63,7 @@ class ZaloPayGateway
                 'app_time' => time() * 1000,
                 'amount' => $amount,
                 'item' => json_encode($itemData),
-                'description' => "Order {$order->id} - E-Commerce Platform",
+                'description' => "Payment for {$payable->id} - E-Commerce Platform",
                 'embed_data' => json_encode($embedData),
                 'callback_url' => $callbackUrl,
             ];
@@ -86,7 +86,7 @@ class ZaloPayGateway
             }
 
             Log::info('ZaloPay payment created', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'zalo_trans_id' => $transId,
             ]);
@@ -99,7 +99,7 @@ class ZaloPayGateway
             ];
         } catch (Exception $e) {
             Log::error('ZaloPay payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

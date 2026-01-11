@@ -2,8 +2,8 @@
 
 namespace App\Services\PaymentGateways;
 
-use App\Models\Order;
 use App\Models\Payment;
+use Illuminate\Database\Eloquent\Model;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -24,12 +24,12 @@ class VNPayGateway
     /**
      * Create a payment and return payment URL
      *
-     * @param Order $order
+     * @param Model $payable (Transaction, GiftTransaction, etc.)
      * @param Payment $payment
      * @param array $data
      * @return array
      */
-    public function createPayment(Order $order, Payment $payment, array $data = [])
+    public function createPayment(Model $payable, Payment $payment, array $data = [])
     {
         try {
             $amount = (int)($payment->amount * 100); // Convert to cents
@@ -47,7 +47,7 @@ class VNPayGateway
                 'vnp_CurrCode' => 'VND',
                 'vnp_IpAddr' => $this->getClientIp(),
                 'vnp_Locale' => 'vn',
-                'vnp_OrderInfo' => "Order {$order->id}",
+                'vnp_OrderInfo' => "Payment for {$payable->id}",
                 'vnp_OrderType' => 'billpayment',
                 'vnp_ReturnUrl' => $returnUrl,
                 'vnp_TxnRef' => $payment->id . '-' . time(),
@@ -71,7 +71,7 @@ class VNPayGateway
             $paymentUrl = $vnpUrl . '?' . $query . '&vnp_SecureHash=' . $vnpSecureHash;
 
             Log::info('VNPay payment created', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'amount' => $payment->amount,
             ]);
@@ -82,7 +82,7 @@ class VNPayGateway
             ];
         } catch (Exception $e) {
             Log::error('VNPay payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

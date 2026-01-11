@@ -6,7 +6,6 @@ use App\Models\ChatbotConversation;
 use App\Models\ChatbotMessage;
 use App\Models\Service;
 use App\Models\File;
-use App\Models\Course;
 use Illuminate\Support\Facades\Http;
 
 class ChatbotService
@@ -86,12 +85,12 @@ class ChatbotService
             return $response;
         }
 
-        if (str_contains($message, 'khóa học') || str_contains($message, 'course')) {
-            $courses = Course::active()->limit(5)->get(['name', 'price']);
-            $response = "Đây là một số khóa học:\n";
-            foreach ($courses as $course) {
-                $response .= "- {$course->name}: " . number_format($course->price) . " VND\n";
-            }
+        // VIP packages query
+        if (str_contains($message, 'vip') || str_contains($message, 'gói') || str_contains($message, 'package')) {
+            $response = "Đây là các gói VIP của chúng tôi:\n";
+            $response .= "- VIP 1 tháng: 99,000 VND\n";
+            $response .= "- VIP 3 tháng: 249,000 VND\n";
+            $response .= "- VIP 12 tháng: 799,000 VND\n";
             return $response;
         }
 
