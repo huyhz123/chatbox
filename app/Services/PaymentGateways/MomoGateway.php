@@ -2,7 +2,7 @@
 
 namespace App\Services\PaymentGateways;
 
-use App\Models\Order;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Payment;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -24,12 +24,12 @@ class MomoGateway
     /**
      * Create a payment and return payment data
      *
-     * @param Order $order
+     * @param Model $payable
      * @param Payment $payment
      * @param array $data
      * @return array
      */
-    public function createPayment(Order $order, Payment $payment, array $data = [])
+    public function createPayment(Model $payable, Payment $payment, array $data = [])
     {
         try {
             $partnerCode = $this->config['partner_code'];
@@ -44,8 +44,8 @@ class MomoGateway
 
             $requestId = time() . '';
             $requestType = 'captureWallet';
-            $extraData = base64_encode(json_encode(['order_id' => $order->id, 'payment_id' => $payment->id]));
-            $rawSignature = "accessKey={$accessKey}&amount={$amount}&extraData={$extraData}&orderId={$orderId}&orderInfo=Order {$order->id}&partnerCode={$partnerCode}&requestId={$requestId}&requestType={$requestType}&returnUrl={$returnUrl}&notifyUrl={$notifyUrl}";
+            $extraData = base64_encode(json_encode(['order_id' => $payable->id, 'payment_id' => $payment->id]));
+            $rawSignature = "accessKey={$accessKey}&amount={$amount}&extraData={$extraData}&orderId={$orderId}&orderInfo=Payment for {$payable->id}&partnerCode={$partnerCode}&requestId={$requestId}&requestType={$requestType}&returnUrl={$returnUrl}&notifyUrl={$notifyUrl}";
 
             $signature = hash_hmac('sha256', $rawSignature, $secretKey);
 
@@ -56,7 +56,7 @@ class MomoGateway
                 'requestId' => $requestId,
                 'amount' => $amount,
                 'orderId' => $orderId,
-                'orderInfo' => "Order {$order->id}",
+                'orderInfo' => "Payment for {$payable->id}",
                 'returnUrl' => $returnUrl,
                 'notifyUrl' => $notifyUrl,
                 'extraData' => $extraData,
@@ -78,7 +78,7 @@ class MomoGateway
             }
 
             Log::info('MoMo payment created', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'momo_order_id' => $orderId,
             ]);
@@ -91,7 +91,7 @@ class MomoGateway
             ];
         } catch (Exception $e) {
             Log::error('MoMo payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

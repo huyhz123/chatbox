@@ -2,7 +2,7 @@
 
 namespace App\Services\PaymentGateways;
 
-use App\Models\Order;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Payment;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -73,12 +73,12 @@ class PayPalGateway
     /**
      * Create a payment and return payment data
      *
-     * @param Order $order
+     * @param Model $payable
      * @param Payment $payment
      * @param array $data
      * @return array
      */
-    public function createPayment(Order $order, Payment $payment, array $data = [])
+    public function createPayment(Model $payable, Payment $payment, array $data = [])
     {
         try {
             $accessToken = $this->getAccessToken();
@@ -106,8 +106,8 @@ class PayPalGateway
                 'intent' => 'CAPTURE',
                 'purchase_units' => [
                     [
-                        'reference_id' => $order->id,
-                        'description' => "Order {$order->id}",
+                        'reference_id' => $payable->id,
+                        'description' => "Payment for {$payable->id}",
                         'amount' => [
                             'currency_code' => strtoupper($payment->currency),
                             'value' => number_format($totalAmount, 2, '.', ''),
@@ -156,7 +156,7 @@ class PayPalGateway
             }
 
             Log::info('PayPal payment created', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'paypal_order_id' => $orderId,
             ]);
@@ -168,7 +168,7 @@ class PayPalGateway
             ];
         } catch (Exception $e) {
             Log::error('PayPal payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

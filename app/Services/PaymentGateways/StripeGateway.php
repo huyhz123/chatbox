@@ -2,7 +2,7 @@
 
 namespace App\Services\PaymentGateways;
 
-use App\Models\Order;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Payment;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -29,12 +29,12 @@ class StripeGateway
     /**
      * Create a payment and return payment session data
      *
-     * @param Order $order
+     * @param Model $payable
      * @param Payment $payment
      * @param array $data
      * @return array
      */
-    public function createPayment(Order $order, Payment $payment, array $data = [])
+    public function createPayment(Model $payable, Payment $payment, array $data = [])
     {
         try {
             $lineItems = [];
@@ -66,14 +66,14 @@ class StripeGateway
                 'cancel_url' => route('payment.cancel', ['payment' => $payment->id]),
                 'customer_email' => $order->user->email ?? null,
                 'metadata' => [
-                    'order_id' => $order->id,
+                    'order_id' => $payable->id,
                     'payment_id' => $payment->id,
                     'user_id' => $order->user_id,
                 ],
             ]);
 
             Log::info('Stripe payment session created', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'session_id' => $session->id,
                 'amount' => $totalAmount,
@@ -86,13 +86,13 @@ class StripeGateway
             ];
         } catch (ApiErrorException $e) {
             Log::error('Stripe payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw new Exception('Stripe payment creation failed: ' . $e->getMessage());
         } catch (Exception $e) {
             Log::error('Stripe payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

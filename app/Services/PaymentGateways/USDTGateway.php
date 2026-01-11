@@ -2,7 +2,7 @@
 
 namespace App\Services\PaymentGateways;
 
-use App\Models\Order;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Payment;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -24,12 +24,12 @@ class USDTGateway
     /**
      * Create a payment and return USDT wallet address and amount
      *
-     * @param Order $order
+     * @param Model $payable
      * @param Payment $payment
      * @param array $data
      * @return array
      */
-    public function createPayment(Order $order, Payment $payment, array $data = [])
+    public function createPayment(Model $payable, Payment $payment, array $data = [])
     {
         try {
             $walletAddress = $this->config['wallet_address'];
@@ -46,7 +46,7 @@ class USDTGateway
 
             // Store payment metadata
             $metadata = [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'amount_usdt' => $usdtAmount,
                 'network' => $network,
@@ -56,7 +56,7 @@ class USDTGateway
             ];
 
             Log::info('USDT payment created', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'payment_id' => $payment->id,
                 'amount_usdt' => $usdtAmount,
                 'network' => $network,
@@ -72,7 +72,7 @@ class USDTGateway
             ];
         } catch (Exception $e) {
             Log::error('USDT payment creation failed', [
-                'order_id' => $order->id,
+                'order_id' => $payable->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

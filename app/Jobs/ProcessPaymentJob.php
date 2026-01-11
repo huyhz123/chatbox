@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Payment;
-use App\Models\Order;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -37,7 +36,8 @@ class ProcessPaymentJob implements ShouldQueue
         try {
             Log::info('Processing payment callback started', [
                 'payment_id' => $this->payment->id,
-                'order_id' => $this->payment->order_id,
+                'payable_type' => $this->payment->payable_type,
+                'payable_id' => $this->payment->payable_id,
                 'amount' => $this->payment->amount,
                 'attempt' => $this->attempts(),
             ]);
@@ -55,27 +55,20 @@ class ProcessPaymentJob implements ShouldQueue
                 'processed_at' => now(),
             ]);
 
-            // Get associated order
-            $order = $this->payment->order();
-            if (!$order) {
-                throw new Exception('Associated order not found for payment');
+            // Get associated payable (Transaction, GiftTransaction, etc.)
+            $payable = $this->payment->payable;
+            if (!$payable) {
+                throw new Exception('Associated payable not found for payment');
             }
 
-            // Update order status
-            $order->update([
-                'payment_status' => 'paid',
-                'paid_at' => now(),
-            ]);
-
-            // Trigger order processing
-            if ($order->status === 'pending') {
-                $order->update(['status' => 'confirmed']);
+            // Update payable status if applicable
+            if (method_exists($payable, 'markAsPaid')) {
+                $payable->markAsPaid();
             }
 
             // Log activity
-            $order->refresh();
             activity()
-                ->performedOn($order)
+                ->performedOn($payable)
                 ->withProperties([
                     'payment_id' => $this->payment->id,
                     'amount' => $this->payment->amount,

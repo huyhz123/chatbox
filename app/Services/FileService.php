@@ -4,17 +4,15 @@ namespace App\Services;
 
 use App\Models\File;
 use App\Models\User;
-use App\Models\Order;
 use App\Models\FileDownload;
 
 class FileService
 {
-    public function unlockFile(User $user, File $file, Order $order)
+    public function unlockFile(User $user, File $file)
     {
         $download = FileDownload::firstOrCreate([
             'file_id' => $file->id,
             'user_id' => $user->id,
-            'order_id' => $order->id,
         ], [
             'ip_address' => request()->ip(),
             'download_count' => 0,
@@ -22,9 +20,6 @@ class FileService
 
         // Increment sold count
         $file->incrementSoldCount();
-
-        // Send notification
-        app(NotificationService::class)->sendFileUnlocked($user, $file);
 
         return $download;
     }

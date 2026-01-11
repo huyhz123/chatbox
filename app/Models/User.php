@@ -51,24 +51,9 @@ class User extends Authenticatable
     }
 
     // Relationships
-    public function orders()
-    {
-        return $this->hasMany(Order::class);
-    }
-
-    public function tickets()
-    {
-        return $this->hasMany(Ticket::class);
-    }
-
     public function payments()
     {
         return $this->hasMany(Payment::class);
-    }
-
-    public function courseEnrollments()
-    {
-        return $this->hasMany(CourseEnrollment::class);
     }
 
     public function fileDownloads()

@@ -12,8 +12,9 @@ class Payment extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = [
-        'order_id',
         'user_id',
+        'payable_type',  // Transaction, GiftTransaction, etc.
+        'payable_id',
         'payment_gateway',
         'transaction_id',
         'amount',
@@ -41,9 +42,9 @@ class Payment extends Model
     }
 
     // Relationships
-    public function order()
+    public function payable()
     {
-        return $this->belongsTo(Order::class);
+        return $this->morphTo();
     }
 
     public function user()

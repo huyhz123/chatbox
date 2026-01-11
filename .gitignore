@@ -17,3 +17,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Build artifacts and archives
+*.zip
+temp_archive/

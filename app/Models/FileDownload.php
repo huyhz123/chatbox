@@ -12,7 +12,6 @@ class FileDownload extends Model
     protected $fillable = [
         'file_id',
         'user_id',
-        'order_id',
         'ip_address',
         'download_count',
         'last_downloaded_at',
@@ -34,11 +33,6 @@ class FileDownload extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
     }
 
     // Helpers
